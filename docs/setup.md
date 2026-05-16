@@ -119,7 +119,7 @@ git push -u origin develop
 3. Framework Preset: **Astro** が自動検出される
 4. Build Command: `pnpm build`
 5. Install Command: `pnpm install`
-6. Output Directory: `.vercel/output`（Astro Vercel アダプタが自動設定）
+6. Output Directory: **空欄のまま**（Astro Vercel adapter が `.vercel/output` を自動生成・自動検出します。UI で明示すると Override 扱いになり想定外の挙動につながるため）
 
 ### 4-3. Vercel 側に環境変数を登録
 

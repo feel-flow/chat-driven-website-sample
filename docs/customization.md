@@ -85,13 +85,34 @@ export default defineConfig({
 
 ### ロゴ
 
-`public/images/logo.svg`（または `.png`）を差し替えます。`src/components/Header.astro` から参照されています。
+現状のサンプルは **テキストロゴ**（`chat-driven-website-sample` という文字列）です。`src/components/Header.astro` の以下の行を編集します。
 
-```bash
-cp ~/your-logo.svg public/images/logo.svg
+```astro
+<a href="/" class="brand">chat-driven-website-sample</a>
 ```
 
-ヘッダーに表示されるサイズを大きく変える場合は `Header.astro` の `<img>` タグの幅 / 高さも調整してください。
+#### テキストロゴを変える場合
+
+文字列を会社名・サービス名に置換するだけです。スタイル（フォントサイズ・色）は同ファイル内の `<style>` ブロックの `.brand` セレクタで調整できます。
+
+#### 画像ロゴに置き換える場合
+
+1. `public/images/` ディレクトリを作成し（既存しないため）、ロゴ画像を配置します。
+
+   ```bash
+   mkdir -p public/images
+   cp ~/your-logo.svg public/images/logo.svg
+   ```
+
+2. `Header.astro` の `.brand` 要素を `<img>` に置き換えます。
+
+   ```astro
+   <a href="/" class="brand">
+     <img src="/images/logo.svg" alt="会社名" width="160" height="32" />
+   </a>
+   ```
+
+3. 必要に応じて `.brand` のスタイルを画像用に調整します（`padding` を狭める等）。
 
 ### 配色
 
