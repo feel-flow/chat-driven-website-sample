@@ -1,0 +1,288 @@
+---
+import { actions, isInputError } from 'astro:actions';
+
+/**
+ * Astro.getActionResult() の戻り値は SafeResult<TInput, TOutput> | undefined。
+ * 簡略化のため、必要な部分だけを抜き出した shape で受け取る。
+ * error は ActionError / ActionInputError どちらの可能性もあるので unknown 寄りに保つ。
+ */
+interface Props {
+  result?:
+    | { data?: { ok: boolean }; error?: unknown }
+    | undefined;
+}
+
+const { result } = Astro.props;
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+const isConfigured = siteKey.length > 0;
+
+const succeeded =
+  (result?.data as { ok?: boolean } | undefined)?.ok === true;
+
+const resultError = result?.error as
+  | { message?: string }
+  | undefined;
+const inputErrors: Record<string, string[] | undefined> = isInputError(
+  result?.error,
+)
+  ? (result.error.fields as Record<string, string[] | undefined>)
+  : {};
+const hasInputErrors = Object.keys(inputErrors).length > 0;
+const errorMessage = resultError?.message ?? null;
+
+const firstError = (field: string): string | null => {
+  const arr = inputErrors[field];
+  return arr && arr.length > 0 ? arr[0] : null;
+};
+
+const nameError = firstError('name');
+const emailError = firstError('email');
+const messageError = firstError('message');
+const turnstileError = firstError('turnstileToken');
+---
+
+{
+  succeeded ? (
+    <div class="contact-success" role="status">
+      <h2>送信が完了しました</h2>
+      <p>お問い合わせありがとうございます。担当者より追ってご連絡いたします。</p>
+    </div>
+  ) : (
+    <>
+      <noscript>
+        <div class="contact-error" role="alert">
+          お問い合わせフォームの送信には JavaScript が必要です。ブラウザの JavaScript を有効にしてからご利用ください。
+        </div>
+      </noscript>
+
+      {!isConfigured && (
+        <div class="contact-error" role="alert">
+          お問い合わせフォームの設定が未完了です。サイト管理者にお問い合わせください。
+        </div>
+      )}
+
+      <form
+        method="POST"
+        action={actions.contact}
+        class="contact-form"
+        novalidate
+      >
+        {errorMessage && !hasInputErrors && (
+          <div class="contact-error" role="alert">
+            {errorMessage}
+          </div>
+        )}
+
+        <div class="field">
+          <label for="contact-name">お名前</label>
+          <input
+            id="contact-name"
+            name="name"
+            type="text"
+            required
+            maxlength="100"
+            autocomplete="name"
+            aria-describedby={nameError ? 'contact-name-error' : undefined}
+            aria-invalid={nameError ? 'true' : undefined}
+          />
+          {nameError && (
+            <p id="contact-name-error" class="field-error" role="alert">
+              {nameError}
+            </p>
+          )}
+        </div>
+
+        <div class="field">
+          <label for="contact-email">メールアドレス</label>
+          <input
+            id="contact-email"
+            name="email"
+            type="email"
+            required
+            autocomplete="email"
+            aria-describedby={emailError ? 'contact-email-error' : undefined}
+            aria-invalid={emailError ? 'true' : undefined}
+          />
+          {emailError && (
+            <p id="contact-email-error" class="field-error" role="alert">
+              {emailError}
+            </p>
+          )}
+        </div>
+
+        <div class="field">
+          <label for="contact-message">お問い合わせ内容</label>
+          <textarea
+            id="contact-message"
+            name="message"
+            rows="6"
+            required
+            minlength="10"
+            maxlength="2000"
+            aria-describedby={messageError ? 'contact-message-error' : undefined}
+            aria-invalid={messageError ? 'true' : undefined}
+          />
+          {messageError && (
+            <p id="contact-message-error" class="field-error" role="alert">
+              {messageError}
+            </p>
+          )}
+        </div>
+
+        <div
+          class="cf-turnstile"
+          data-sitekey={siteKey}
+          data-response-field-name="turnstileToken"
+        />
+        {turnstileError && (
+          <p class="field-error" role="alert">
+            {turnstileError}
+          </p>
+        )}
+
+        <button
+          type="submit"
+          class="contact-submit"
+          disabled={!isConfigured}
+        >
+          送信する
+        </button>
+
+        <p class="contact-note">
+          ※ スパム対策として Cloudflare Turnstile を利用しています。チャレンジが表示された場合はクリアしてから送信してください。
+        </p>
+      </form>
+    </>
+  )
+}
+
+<script
+  is:inline
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  async
+  defer
+/>
+
+{
+  /*
+   * エラー応答後、Turnstile の token は widget 内部 state に残ったまま消費済みになるため、
+   * 同じ token で再 submit すると siteverify が "timeout-or-duplicate" で必ず失敗する。
+   * errorMessage が表示されているときは widget を reset しておく。
+   */
+  errorMessage && (
+    <script is:inline>
+      {`
+        (function () {
+          function tryReset() {
+            if (window.turnstile && typeof window.turnstile.reset === 'function') {
+              try { window.turnstile.reset(); } catch (_) {}
+              return true;
+            }
+            return false;
+          }
+          if (!tryReset()) {
+            var attempts = 0;
+            var timer = setInterval(function () {
+              attempts += 1;
+              if (tryReset() || attempts > 20) {
+                clearInterval(timer);
+              }
+            }, 250);
+          }
+        })();
+      `}
+    </script>
+  )
+}
+
+<style>
+  .contact-form {
+    display: grid;
+    gap: 1.25rem;
+    background: var(--color-surface);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+  }
+  .field {
+    display: grid;
+    gap: 0.35rem;
+  }
+  .field label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-primary);
+  }
+  .field input,
+  .field textarea {
+    font: inherit;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    width: 100%;
+  }
+  .field input:focus,
+  .field textarea:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+  .field input[aria-invalid='true'],
+  .field textarea[aria-invalid='true'] {
+    border-color: #991b1b;
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 8rem;
+  }
+  .field-error {
+    margin: 0;
+    color: #991b1b;
+    font-size: 0.85rem;
+  }
+  .contact-submit {
+    justify-self: start;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .contact-submit:hover {
+    background: var(--color-primary-strong);
+  }
+  .contact-submit:disabled {
+    background: var(--color-border);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+  }
+  .contact-note {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .contact-error {
+    padding: 0.85rem 1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    color: #991b1b;
+    margin-bottom: 1rem;
+  }
+  .contact-success {
+    background: var(--color-surface);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+  }
+  .contact-success h2 {
+    margin: 0 0 0.5rem;
+  }
+  .contact-success p {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+</style>
