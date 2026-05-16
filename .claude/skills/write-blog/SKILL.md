@@ -41,6 +41,11 @@ URL 以外の情報が不足している場合は、深掘りポイントだけ�
 - 内容を表す 2〜4 単語（例: `codex-launch`、`new-pricing-2026`、`ai-consulting-pmf`）
 - `src/content/news/` 配下に既存ファイル名と衝突しないことを確認
 
+```bash
+# slug 衝突チェック
+test -e src/content/news/<slug>.md && echo "CONFLICT: <slug> already exists, choose another"
+```
+
 ### Step 3: frontmatter の組み立て
 
 ```yaml

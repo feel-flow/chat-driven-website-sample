@@ -46,6 +46,11 @@ ls src/content/news/
 - 内容を表す 2〜4 単語（例: `pricing-update-2026`、`spring-campaign`、`team-expansion`）
 - 既存ファイルと衝突しないこと
 
+```bash
+# slug 衝突チェック
+test -e src/content/news/<slug>.md && echo "CONFLICT: <slug> already exists, choose another"
+```
+
 ### Step 3: frontmatter の組み立て
 
 ```yaml
