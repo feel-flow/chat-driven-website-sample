@@ -5,7 +5,11 @@ import Article from '../../layouts/Article.astro';
 export const prerender = true;
 
 export async function getStaticPaths() {
-  const posts = await getCollection('news');
+  const now = new Date();
+  const posts = await getCollection(
+    'news',
+    ({ data }) => data.publishedAt <= now,
+  );
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },

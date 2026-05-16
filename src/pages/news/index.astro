@@ -2,9 +2,10 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 
-const posts = (await getCollection('news')).sort(
-  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
-);
+const now = new Date();
+const posts = (
+  await getCollection('news', ({ data }) => data.publishedAt <= now)
+).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
 const dateFmt = new Intl.DateTimeFormat('ja-JP', { dateStyle: 'long' });
 ---
