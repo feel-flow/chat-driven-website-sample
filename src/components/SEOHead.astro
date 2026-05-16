@@ -1,0 +1,57 @@
+---
+import { siteConfig } from '../config/site';
+
+// description は 50-160 字推奨（日本語は 80-120 字目安。それ以上は検索結果で truncate される）
+interface Props {
+  title: string;
+  description: string;
+  canonical?: string;
+  ogImage?: string;
+  type?: 'website' | 'article';
+}
+
+const {
+  title,
+  description,
+  canonical,
+  ogImage,
+  type = 'website',
+} = Astro.props;
+
+// canonical は SSR URL の query (UTM 等) を含めないよう pathname のみで正規化する
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).href;
+const ogImageUrl = ogImage ? new URL(ogImage, Astro.site).href : undefined;
+const siteName = siteConfig.name;
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrl} />
+
+<!-- OGP -->
+<meta property="og:type" content={type} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonicalUrl} />
+<meta property="og:site_name" content={siteName} />
+<meta property="og:locale" content="ja_JP" />
+{ogImageUrl && (
+  <>
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:alt" content={title} />
+  </>
+)}
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content={ogImageUrl ? 'summary_large_image' : 'summary'} />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+{ogImageUrl && <meta name="twitter:image" content={ogImageUrl} />}
+{/* TODO: 公開時に <meta name="twitter:site" content="@your_handle" /> を追加 */}
+
+<!-- Organization JSON-LD -->
+<script type="application/ld+json" is:inline set:html={JSON.stringify({
+  '@context': 'https://schema.org',
+  '@type': 'Organization',
+  name: siteName,
+  url: Astro.site?.href,
+})} />
