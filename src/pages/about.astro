@@ -1,0 +1,95 @@
+---
+import Base from '../layouts/Base.astro';
+import CTA from '../components/CTA.astro';
+
+const title = '会社案内 — chat-driven-website-sample';
+const description =
+  'chat-driven-website-sample は、書籍「生成AI ホームページ運用」のサンプルサイトです。会社案内ページのテンプレートとしてご利用ください。';
+
+const members = [
+  {
+    name: '山田 太郎',
+    role: '代表取締役',
+    bio: 'Web 制作と AI ワークフロー設計を専門とする。',
+  },
+  {
+    name: '佐藤 花子',
+    role: 'プロダクトリード',
+    bio: 'Astro / Vercel / Codex を用いたサイト運用設計を担当。',
+  },
+];
+---
+<Base title={title} description={description}>
+  <section class="section">
+    <div class="container">
+      <h1 class="page-title">会社案内</h1>
+      <p class="lead">
+        サンプル会社の概要ページです。書籍の読者は、このページを起点に自社情報へ差し替えてください。
+      </p>
+    </div>
+  </section>
+
+  <section class="section about-grid">
+    <div class="container">
+      <h2 class="section-heading">私たちの考え</h2>
+      <p>
+        会社のホームページは、納品物ではなく <strong>運用資産</strong> です。
+        作って終わりではなく、毎週・毎月手を加え続けることで、ようやく集客と信頼の装置になります。
+      </p>
+      <p>
+        本サンプル会社では、生成 AI × チャット運用で「外注なし・月額 1/100・更新 5 秒」を実現する仕組みを実装しました。
+        あなたの会社でも、同じスタックで同じ運用が再現できます。
+      </p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-heading">メンバー</h2>
+      <div class="grid-3 members">
+        {members.map((m) => (
+          <article class="member">
+            <h3>{m.name}</h3>
+            <p class="role">{m.role}</p>
+            <p class="bio">{m.bio}</p>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <CTA
+      heading="導入のご相談はお気軽に"
+      body="サンプルリポの fork 方法から、自社向けカスタマイズの進め方までご案内します。"
+    />
+  </div>
+</Base>
+
+<style>
+  .page-title {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    margin: 0 0 0.75rem;
+  }
+  .members .member {
+    background: var(--color-surface);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+  }
+  .member h3 {
+    margin: 0;
+    font-size: 1.05rem;
+  }
+  .member .role {
+    margin: 0.25rem 0 0.75rem;
+    color: var(--color-accent);
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  .member .bio {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+</style>

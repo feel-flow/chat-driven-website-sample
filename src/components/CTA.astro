@@ -1,0 +1,61 @@
+---
+interface Props {
+  heading: string;
+  body?: string;
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
+const {
+  heading,
+  body,
+  ctaLabel = 'お問い合わせはこちら',
+  ctaHref = '/contact',
+} = Astro.props;
+---
+<section class="cta">
+  <div class="container cta-inner">
+    <h2 class="cta-heading">{heading}</h2>
+    {body && <p class="cta-body">{body}</p>}
+    <a class="cta-button" href={ctaHref}>{ctaLabel}</a>
+  </div>
+</section>
+
+<style>
+  .cta {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
+    color: var(--color-on-primary);
+    padding-block: 3rem;
+    margin-block: 3rem;
+    border-radius: 12px;
+  }
+  .cta-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 1rem;
+  }
+  .cta-heading {
+    margin: 0;
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+  }
+  .cta-body {
+    margin: 0;
+    max-width: 36rem;
+    opacity: 0.9;
+  }
+  .cta-button {
+    display: inline-block;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    padding: 0.75rem 1.75rem;
+    border-radius: 999px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: transform 0.15s ease;
+  }
+  .cta-button:hover {
+    transform: translateY(-1px);
+  }
+</style>

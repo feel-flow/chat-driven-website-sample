@@ -1,0 +1,58 @@
+---
+interface Props {
+  title: string;
+  summary: string;
+  href: string;
+  icon?: string;
+}
+
+const { title, summary, href, icon } = Astro.props;
+---
+<a class="service-card" href={href}>
+  {icon && <div class="icon" aria-hidden="true">{icon}</div>}
+  <h3 class="card-title">{title}</h3>
+  <p class="card-summary">{summary}</p>
+  <span class="card-cta">詳しく見る →</span>
+</a>
+
+<style>
+  .service-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--color-text);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+  .service-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(11, 31, 58, 0.08);
+    border-color: var(--color-primary);
+  }
+  .icon {
+    font-size: 1.75rem;
+    line-height: 1;
+  }
+  .card-title {
+    margin: 0;
+    font-size: 1.1rem;
+    color: var(--color-primary);
+  }
+  .card-summary {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+    flex-grow: 1;
+  }
+  .card-cta {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+</style>

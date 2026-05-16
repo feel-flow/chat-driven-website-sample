@@ -1,17 +1,163 @@
 ---
+import Base from '../layouts/Base.astro';
+import ServiceCard from '../components/ServiceCard.astro';
+import CTA from '../components/CTA.astro';
 
+const title = 'chat-driven-website-sample — 生成AI ホームページ運用 サンプルサイト';
+const description =
+  '書籍「生成AI ホームページ運用 ― 外注なし・コスト1/100・更新5秒の Codex × Astro 入門」の教材リポ。会社サイトの典型構造を Astro で実装。';
+
+const features = [
+  {
+    title: '外注なし',
+    body: 'チャットで指示するだけで更新が完結。Web 制作会社に依頼する必要がない。',
+  },
+  {
+    title: 'コスト 1/100',
+    body: 'Astro + Vercel + Resend の無料枠で運用開始。月額数千円規模に収まる。',
+  },
+  {
+    title: '更新 5 秒',
+    body: 'AI に指示してから本番反映まで5秒の世界。CI/CD と auto-merge を Skills で標準化。',
+  },
+];
+
+const services = [
+  {
+    title: 'Web 制作',
+    summary: '会社サイトを Astro テンプレートから構築。SEO 基盤と CMS 不要構成。',
+    href: '/services/web-development',
+    icon: '🛠',
+  },
+  {
+    title: 'AI コンサルティング',
+    summary: 'Codex / Claude Code を業務に組み込むワークフロー設計と教育。',
+    href: '/services/ai-consulting',
+    icon: '🤖',
+  },
+];
 ---
+<Base title={title} description={description}>
+  <section class="hero">
+    <div class="container hero-inner">
+      <p class="eyebrow">Sample Company</p>
+      <h1>会社サイトを、チャットだけで運用する。</h1>
+      <p class="hero-lead">
+        外注なし・月額 1/100・更新 5 秒。Codex × Astro で会社サイトを「納品物」から「運用資産」へ。
+      </p>
+      <div class="hero-cta">
+        <a href="/services" class="primary">サービスを見る</a>
+        <a href="/contact" class="secondary">相談する</a>
+      </div>
+    </div>
+  </section>
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+  <section class="section">
+    <div class="container">
+      <h2 class="section-heading">本サンプルが示す 3 つの体験</h2>
+      <p class="lead">
+        書籍で扱う「外注なし・1/100・5秒」を実装レベルで体感できる教材リポです。
+      </p>
+      <div class="grid-3">
+        {features.map((f) => (
+          <div class="feature">
+            <h3>{f.title}</h3>
+            <p>{f.body}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container">
+      <h2 class="section-heading">サービス</h2>
+      <p class="lead">事業構成のサンプル。実プロジェクトでは自社サービスに差し替えてください。</p>
+      <div class="grid-3">
+        {services.map((s) => (
+          <ServiceCard {...s} />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <CTA
+      heading="あなたの会社サイトでも、5秒運用を試してみませんか？"
+      body="本サンプルリポを fork すれば、その日のうちに自社サイトを動かせます。"
+      ctaLabel="お問い合わせはこちら"
+    />
+  </div>
+</Base>
+
+<style>
+  .hero {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-strong));
+    color: var(--color-on-primary);
+    padding-block: clamp(3rem, 8vw, 5rem);
+  }
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.25rem;
+  }
+  .eyebrow {
+    margin: 0;
+    font-size: 0.85rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    opacity: 0.75;
+  }
+  .hero h1 {
+    color: var(--color-on-primary);
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    margin: 0;
+    max-width: 32ch;
+    line-height: 1.3;
+  }
+  .hero-lead {
+    margin: 0;
+    max-width: 40rem;
+    font-size: 1.05rem;
+    opacity: 0.9;
+  }
+  .hero-cta {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+  }
+  .hero-cta a {
+    display: inline-block;
+    padding: 0.7rem 1.5rem;
+    border-radius: 999px;
+    text-decoration: none;
+    font-weight: 600;
+  }
+  .primary {
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+  }
+  .secondary {
+    border: 1px solid var(--color-on-primary);
+    color: var(--color-on-primary);
+  }
+
+  .feature {
+    background: var(--color-surface);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+  }
+  .feature h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1.1rem;
+  }
+  .feature p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.7;
+  }
+</style>
