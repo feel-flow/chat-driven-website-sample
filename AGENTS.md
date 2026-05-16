@@ -49,7 +49,7 @@ src/
 - フレームワーク: **Astro 6.x**（`output: 'server'`、Vercel アダプタ）
 - コンテンツ: Markdown + Content Collections (`glob` ローダ)
 - フォーム: **Astro Server Actions** + Resend + Cloudflare Turnstile
-- デプロイ: Vercel（main マージで自動）
+- デプロイ: Vercel（develop マージで自動）
 
 ---
 
@@ -152,7 +152,7 @@ tags:
 3. 本文構成は既存の `ai-consulting.md` / `web-development.md` を踏襲
    - 「こんな方におすすめ」 or 「主な支援メニュー」
    - 「標準プラン」テーブル
-   - 末尾に [お問い合わせは こちら](/contact) のリンク
+   - 末尾に「お問い合わせは [お問い合わせフォーム](/contact) からお願いします。」のような descriptive な anchor の内部リンクを置く（`こちら` だけの anchor は避ける）
 4. サービス一覧ページ (`src/pages/services/index.astro`) は Content Collections から自動生成されるため、ファイル追加だけで反映される
 5. 検証 → `pnpm astro check` / `pnpm build`
 6. PR 作成
@@ -185,7 +185,7 @@ JSON-LD の `Organization` は `SEOHead.astro` で全ページに自動付与さ
 
 ### 基本フロー
 
-1. ブランチ作成: `feature/#<issue>-<short-slug>` または `docs/news-<slug>`
+1. ブランチ作成: `feature/#<issue>-<short-slug>`（Issue 番号を必ず含める。`docs:` / `feat:` / `fix:` のいずれの PR でもこの命名で統一する）
 2. 変更ファイルは原則 **1 PR 1 トピック**（ニュース 1 件、サービス 1 件、など）
 3. PR タイトルは `docs:` / `feat:` / `fix:` プレフィックス + 内容を 70 字以内で
 4. PR 本文に以下を含める

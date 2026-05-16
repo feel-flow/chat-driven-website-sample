@@ -97,13 +97,15 @@ pnpm build
 
 ### Step 7: PR 作成
 
+ブランチ名は `feature/#<issue番号>-<short-slug>` 形式（AGENTS.md「PR / レビューの方針」の宣言と整合）。Issue 番号は対話的にユーザーから受け取るか、必要なら `gh issue create --assignee @me` で先に発行する。
+
 ```bash
-git checkout -b docs/news-<slug>
+git checkout -b feature/#<issue>-news-<slug>
 git add src/content/news/<slug>.md
-git commit -m "docs: add news article <slug>"
-git push -u origin docs/news-<slug>
+git commit -m "docs: #<issue> add news article <slug>"
+git push -u origin feature/#<issue>-news-<slug>
 gh pr create --draft --base develop \
-  --title "docs: add news article <slug>" \
+  --title "docs: #<issue> add news article <slug>" \
   --body "$(cat <<'EOF'
 ## 概要
 

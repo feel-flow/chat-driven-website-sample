@@ -48,10 +48,11 @@ ls src/content/services/
 ---
 title: <サービス名>
 summary: <60〜100 字。一覧カードに表示される短い説明>
-icon: <絵文字 1 文字、任意>
 order: <既存サービスの最大 order + 1>
 ---
 ```
+
+`icon` は **任意フィールド** であり、**指定する場合のみ** `icon: 🤖` のような行を `order` の前後に追加する。指定しない場合は `icon:` 行を frontmatter から省略すること（空文字 `icon: ""` を残すと、一覧カードに空のアイコン枠が描画される）。
 
 `summary` は **一覧ページのカード本文** になるため、サービスの中核価値が 1〜2 文で伝わる文にする。
 
@@ -85,13 +86,14 @@ order: <既存サービスの最大 order + 1>
 |--------|------|------|
 | <プラン名> | <期間> | <内容> |
 
-お問い合わせは [こちら](/contact) からお願いします。
+お問い合わせは [お問い合わせフォーム](/contact) からお願いします。
 ```
 
 - 文体: です・ます調
 - 一文 60〜80 字
 - 効果に数値を入れる場合は **必ず** 根拠（実績ベース、業界平均 等）を付ける。捏造禁止
 - 末尾の `/contact` リンクは **必ず** 残す（CV 動線）
+- リンクテキストは `こちら` だけにせず、`お問い合わせフォーム` のように descriptive な anchor にする（アクセシビリティ + SEO）
 
 ### Step 5: ファイルの書き込み
 
@@ -109,13 +111,15 @@ pnpm build
 
 ### Step 7: PR 作成
 
+ブランチ名は `feature/#<issue番号>-<short-slug>` 形式（AGENTS.md「PR / レビューの方針」の宣言と整合）。Issue 番号は対話的にユーザーから受け取るか、必要なら `gh issue create --assignee @me` で先に発行する。
+
 ```bash
-git checkout -b feature/add-service-<slug>
+git checkout -b feature/#<issue>-add-service-<slug>
 git add src/content/services/<slug>.md
-git commit -m "feat: add service page <slug>"
-git push -u origin feature/add-service-<slug>
+git commit -m "feat: #<issue> add service page <slug>"
+git push -u origin feature/#<issue>-add-service-<slug>
 gh pr create --draft --base develop \
-  --title "feat: add service page <slug>" \
+  --title "feat: #<issue> add service page <slug>" \
   --body "$(cat <<'EOF'
 ## 概要
 
