@@ -1,6 +1,7 @@
 # Astro build outputs
 .astro/
-.vercel/
+.vercel/*
+!.vercel/project.json
 dist/
 
 # Logs
