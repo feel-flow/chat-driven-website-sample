@@ -1,0 +1,82 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const posts = (await getCollection('news')).sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+);
+
+const dateFmt = new Intl.DateTimeFormat('ja-JP', { dateStyle: 'long' });
+---
+<Base
+  title="ニュース — chat-driven-website-sample"
+  description="サンプル会社のお知らせ一覧。書籍「生成AI ホームページ運用」のサンプルサイトです。"
+>
+  <section class="section">
+    <div class="container">
+      <h1 class="page-title">ニュース</h1>
+      <p class="lead">
+        サンプル会社のお知らせ一覧。Content Collections で frontmatter から自動生成されています。
+      </p>
+
+      {posts.length === 0 ? (
+        <p>現在お知らせはありません。</p>
+      ) : (
+        <ul class="news-list">
+          {posts.map((post) => (
+            <li class="news-item">
+              <a href={`/news/${post.id}`}>
+                <time datetime={post.data.publishedAt.toISOString()}>
+                  {dateFmt.format(post.data.publishedAt)}
+                </time>
+                <h2>{post.data.title}</h2>
+                <p>{post.data.description}</p>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page-title {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    margin: 0 0 0.75rem;
+  }
+  .news-list {
+    list-style: none;
+    padding: 0;
+    margin: 1.5rem 0 0;
+    display: grid;
+    gap: 1rem;
+  }
+  .news-item a {
+    display: block;
+    padding: 1.5rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    text-decoration: none;
+    color: var(--color-text);
+    transition: border-color 0.15s ease, transform 0.15s ease;
+  }
+  .news-item a:hover {
+    border-color: var(--color-primary);
+    transform: translateY(-2px);
+  }
+  .news-item time {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+  .news-item h2 {
+    margin: 0.5rem 0;
+    font-size: 1.15rem;
+  }
+  .news-item p {
+    margin: 0;
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+  }
+</style>

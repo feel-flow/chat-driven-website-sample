@@ -1,0 +1,48 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import ServiceCard from '../../components/ServiceCard.astro';
+import CTA from '../../components/CTA.astro';
+
+const services = (await getCollection('services')).sort(
+  (a, b) => a.data.order - b.data.order,
+);
+---
+<Base
+  title="サービス — chat-driven-website-sample"
+  description="サンプル会社の提供サービス一覧。Web 制作と AI コンサルティングを提供しています。"
+>
+  <section class="section">
+    <div class="container">
+      <h1 class="page-title">サービス</h1>
+      <p class="lead">
+        本サンプル会社の提供サービス一覧です。Content Collections の services コレクションから自動生成。
+      </p>
+
+      <div class="grid-3">
+        {services.map((s) => (
+          <ServiceCard
+            title={s.data.title}
+            summary={s.data.summary}
+            href={`/services/${s.id}`}
+            icon={s.data.icon}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <div class="container">
+    <CTA
+      heading="サービスについて、まずはお気軽にご相談ください"
+      body="お問い合わせフォームから 1 営業日以内に折り返しご連絡します。"
+    />
+  </div>
+</Base>
+
+<style>
+  .page-title {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    margin: 0 0 0.75rem;
+  }
+</style>

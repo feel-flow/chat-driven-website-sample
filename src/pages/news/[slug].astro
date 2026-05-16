@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from 'astro:content';
+import Article from '../../layouts/Article.astro';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const posts = await getCollection('news');
+  return posts.map((post) => ({
+    params: { slug: post.id },
+    props: { post },
+  }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+<Article
+  title={post.data.title}
+  description={post.data.description}
+  publishedAt={post.data.publishedAt}
+  tags={post.data.tags}
+  backHref="/news"
+  backLabel="ニュース一覧へ戻る"
+>
+  <Content />
+</Article>
