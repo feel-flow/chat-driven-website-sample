@@ -42,6 +42,11 @@ ls src/content/services/
 - サービス名の英訳または通称をベースにする
 - 2〜3 単語以内に収める
 
+```bash
+# slug 衝突チェック
+test -e src/content/services/<slug>.md && echo "CONFLICT: <slug> already exists, choose another"
+```
+
 ### Step 3: frontmatter の組み立て
 
 ```yaml
