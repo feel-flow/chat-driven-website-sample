@@ -16,24 +16,24 @@ export const GET: APIRoute = async ({ request }) => {
 
   const deployHookUrl = import.meta.env.DEPLOY_HOOK_URL;
   if (!deployHookUrl) {
-    return new Response(
-      JSON.stringify({
-        error: 'DEPLOY_HOOK_URL is not configured',
-        hint: 'Create a Deploy Hook in Vercel: Project Settings → Git → Deploy Hooks',
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    );
+    console.error('[cron/publish-scheduled] DEPLOY_HOOK_URL is not configured');
+    return new Response(JSON.stringify({ error: 'Service misconfigured' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 
   try {
     const response = await fetch(deployHookUrl, { method: 'POST' });
-    const vercelResponse = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      console.error(
+        `[cron/publish-scheduled] Deploy hook returned ${response.status}`,
+      );
+    }
     return new Response(
       JSON.stringify({
         triggered: response.ok,
-        status: response.status,
         timestamp: new Date().toISOString(),
-        vercelResponse,
       }),
       {
         status: response.ok ? 200 : 502,
@@ -41,12 +41,10 @@ export const GET: APIRoute = async ({ request }) => {
       },
     );
   } catch (error) {
-    return new Response(
-      JSON.stringify({
-        error: 'Failed to trigger deploy hook',
-        message: error instanceof Error ? error.message : 'Unknown error',
-      }),
-      { status: 500, headers: { 'Content-Type': 'application/json' } },
-    );
+    console.error('[cron/publish-scheduled] Failed to trigger deploy hook', error);
+    return new Response(JSON.stringify({ error: 'Deploy hook unreachable' }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    });
   }
 };

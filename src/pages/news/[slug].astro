@@ -5,11 +5,12 @@ import Article from '../../layouts/Article.astro';
 export const prerender = true;
 
 export async function getStaticPaths() {
+  const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
   const now = new Date();
-  const posts = await getCollection(
-    'news',
-    ({ data }) => data.publishedAt <= now,
-  );
+  const posts = await getCollection('news', ({ data }) => {
+    const jstMidnightUtc = new Date(data.publishedAt.getTime() - JST_OFFSET_MS);
+    return jstMidnightUtc <= now;
+  });
   return posts.map((post) => ({
     params: { slug: post.id },
     props: { post },
