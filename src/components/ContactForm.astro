@@ -1,21 +1,44 @@
 ---
-import { actions } from 'astro:actions';
+import { actions, isInputError } from 'astro:actions';
 
 /**
  * Astro.getActionResult() の戻り値は SafeResult<TInput, TOutput> | undefined。
  * 簡略化のため、必要な部分だけを抜き出した shape で受け取る。
+ * error は ActionError / ActionInputError どちらの可能性もあるので unknown 寄りに保つ。
  */
 interface Props {
   result?:
-    | { data?: { ok: boolean }; error?: { message: string } }
+    | { data?: { ok: boolean }; error?: unknown }
     | undefined;
 }
 
 const { result } = Astro.props;
 const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+const isConfigured = siteKey.length > 0;
 
-const succeeded = result?.data?.ok === true;
-const errorMessage = result?.error?.message ?? null;
+const succeeded =
+  (result?.data as { ok?: boolean } | undefined)?.ok === true;
+
+const resultError = result?.error as
+  | { message?: string }
+  | undefined;
+const inputErrors: Record<string, string[] | undefined> = isInputError(
+  result?.error,
+)
+  ? (result.error.fields as Record<string, string[] | undefined>)
+  : {};
+const hasInputErrors = Object.keys(inputErrors).length > 0;
+const errorMessage = resultError?.message ?? null;
+
+const firstError = (field: string): string | null => {
+  const arr = inputErrors[field];
+  return arr && arr.length > 0 ? arr[0] : null;
+};
+
+const nameError = firstError('name');
+const emailError = firstError('email');
+const messageError = firstError('message');
+const turnstileError = firstError('turnstileToken');
 ---
 
 {
@@ -25,60 +48,111 @@ const errorMessage = result?.error?.message ?? null;
       <p>お問い合わせありがとうございます。担当者より追ってご連絡いたします。</p>
     </div>
   ) : (
-    <form method="POST" action={actions.contact} class="contact-form" novalidate>
-      {errorMessage && (
+    <>
+      <noscript>
         <div class="contact-error" role="alert">
-          {errorMessage}
+          お問い合わせフォームの送信には JavaScript が必要です。ブラウザの JavaScript を有効にしてからご利用ください。
+        </div>
+      </noscript>
+
+      {!isConfigured && (
+        <div class="contact-error" role="alert">
+          お問い合わせフォームの設定が未完了です。サイト管理者にお問い合わせください。
         </div>
       )}
 
-      <div class="field">
-        <label for="contact-name">お名前</label>
-        <input
-          id="contact-name"
-          name="name"
-          type="text"
-          required
-          maxlength="100"
-          autocomplete="name"
+      <form
+        method="POST"
+        action={actions.contact}
+        class="contact-form"
+        novalidate
+      >
+        {errorMessage && !hasInputErrors && (
+          <div class="contact-error" role="alert">
+            {errorMessage}
+          </div>
+        )}
+
+        <div class="field">
+          <label for="contact-name">お名前</label>
+          <input
+            id="contact-name"
+            name="name"
+            type="text"
+            required
+            maxlength="100"
+            autocomplete="name"
+            aria-describedby={nameError ? 'contact-name-error' : undefined}
+            aria-invalid={nameError ? 'true' : undefined}
+          />
+          {nameError && (
+            <p id="contact-name-error" class="field-error" role="alert">
+              {nameError}
+            </p>
+          )}
+        </div>
+
+        <div class="field">
+          <label for="contact-email">メールアドレス</label>
+          <input
+            id="contact-email"
+            name="email"
+            type="email"
+            required
+            autocomplete="email"
+            aria-describedby={emailError ? 'contact-email-error' : undefined}
+            aria-invalid={emailError ? 'true' : undefined}
+          />
+          {emailError && (
+            <p id="contact-email-error" class="field-error" role="alert">
+              {emailError}
+            </p>
+          )}
+        </div>
+
+        <div class="field">
+          <label for="contact-message">お問い合わせ内容</label>
+          <textarea
+            id="contact-message"
+            name="message"
+            rows="6"
+            required
+            minlength="10"
+            maxlength="2000"
+            aria-describedby={messageError ? 'contact-message-error' : undefined}
+            aria-invalid={messageError ? 'true' : undefined}
+          />
+          {messageError && (
+            <p id="contact-message-error" class="field-error" role="alert">
+              {messageError}
+            </p>
+          )}
+        </div>
+
+        <div
+          class="cf-turnstile"
+          data-sitekey={siteKey}
+          data-response-field-name="turnstileToken"
         />
-      </div>
+        {turnstileError && (
+          <p class="field-error" role="alert">
+            {turnstileError}
+          </p>
+        )}
 
-      <div class="field">
-        <label for="contact-email">メールアドレス</label>
-        <input
-          id="contact-email"
-          name="email"
-          type="email"
-          required
-          autocomplete="email"
-        />
-      </div>
+        <button
+          type="submit"
+          class="contact-submit"
+          disabled={!isConfigured}
+        >
+          送信する
+        </button>
 
-      <div class="field">
-        <label for="contact-message">お問い合わせ内容</label>
-        <textarea
-          id="contact-message"
-          name="message"
-          rows="6"
-          required
-          minlength="10"
-          maxlength="2000"
-        />
-      </div>
-
-      <div
-        class="cf-turnstile"
-        data-sitekey={siteKey}
-        data-response-field-name="turnstileToken"
-      />
-
-      <button type="submit" class="contact-submit">送信する</button>
-
-      <p class="contact-note">
-        ※ スパム対策として Cloudflare Turnstile を利用しています。チャレンジが表示された場合はクリアしてから送信してください。
-      </p>
-    </form>
+        <p class="contact-note">
+          ※ スパム対策として Cloudflare Turnstile を利用しています。チャレンジが表示された場合はクリアしてから送信してください。
+        </p>
+      </form>
+    </>
   )
 }
 
@@ -88,6 +162,38 @@ const errorMessage = result?.error?.message ?? null;
   async
   defer
 />
+
+{
+  /*
+   * エラー応答後、Turnstile の token は widget 内部 state に残ったまま消費済みになるため、
+   * 同じ token で再 submit すると siteverify が "timeout-or-duplicate" で必ず失敗する。
+   * errorMessage が表示されているときは widget を reset しておく。
+   */
+  errorMessage && (
+    <script is:inline>
+      {`
+        (function () {
+          function tryReset() {
+            if (window.turnstile && typeof window.turnstile.reset === 'function') {
+              try { window.turnstile.reset(); } catch (_) {}
+              return true;
+            }
+            return false;
+          }
+          if (!tryReset()) {
+            var attempts = 0;
+            var timer = setInterval(function () {
+              attempts += 1;
+              if (tryReset() || attempts > 20) {
+                clearInterval(timer);
+              }
+            }, 250);
+          }
+        })();
+      `}
+    </script>
+  )
+}
 
 <style>
   .contact-form {
@@ -122,9 +228,18 @@ const errorMessage = result?.error?.message ?? null;
     outline: 2px solid var(--color-accent);
     outline-offset: 1px;
   }
+  .field input[aria-invalid='true'],
+  .field textarea[aria-invalid='true'] {
+    border-color: #991b1b;
+  }
   .field textarea {
     resize: vertical;
     min-height: 8rem;
+  }
+  .field-error {
+    margin: 0;
+    color: #991b1b;
+    font-size: 0.85rem;
   }
   .contact-submit {
     justify-self: start;
@@ -139,6 +254,11 @@ const errorMessage = result?.error?.message ?? null;
   .contact-submit:hover {
     background: var(--color-primary-strong);
   }
+  .contact-submit:disabled {
+    background: var(--color-border);
+    color: var(--color-text-muted);
+    cursor: not-allowed;
+  }
   .contact-note {
     margin: 0;
     font-size: 0.85rem;
@@ -150,6 +270,7 @@ const errorMessage = result?.error?.message ?? null;
     border: 1px solid #fecaca;
     border-radius: 6px;
     color: #991b1b;
+    margin-bottom: 1rem;
   }
   .contact-success {
     background: var(--color-surface);
