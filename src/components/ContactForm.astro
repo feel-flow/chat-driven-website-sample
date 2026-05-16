@@ -1,0 +1,167 @@
+---
+import { actions } from 'astro:actions';
+
+/**
+ * Astro.getActionResult() の戻り値は SafeResult<TInput, TOutput> | undefined。
+ * 簡略化のため、必要な部分だけを抜き出した shape で受け取る。
+ */
+interface Props {
+  result?:
+    | { data?: { ok: boolean }; error?: { message: string } }
+    | undefined;
+}
+
+const { result } = Astro.props;
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? '';
+
+const succeeded = result?.data?.ok === true;
+const errorMessage = result?.error?.message ?? null;
+---
+
+{
+  succeeded ? (
+    <div class="contact-success" role="status">
+      <h2>送信が完了しました</h2>
+      <p>お問い合わせありがとうございます。担当者より追ってご連絡いたします。</p>
+    </div>
+  ) : (
+    <form method="POST" action={actions.contact} class="contact-form" novalidate>
+      {errorMessage && (
+        <div class="contact-error" role="alert">
+          {errorMessage}
+        </div>
+      )}
+
+      <div class="field">
+        <label for="contact-name">お名前</label>
+        <input
+          id="contact-name"
+          name="name"
+          type="text"
+          required
+          maxlength="100"
+          autocomplete="name"
+        />
+      </div>
+
+      <div class="field">
+        <label for="contact-email">メールアドレス</label>
+        <input
+          id="contact-email"
+          name="email"
+          type="email"
+          required
+          autocomplete="email"
+        />
+      </div>
+
+      <div class="field">
+        <label for="contact-message">お問い合わせ内容</label>
+        <textarea
+          id="contact-message"
+          name="message"
+          rows="6"
+          required
+          minlength="10"
+          maxlength="2000"
+        />
+      </div>
+
+      <div
+        class="cf-turnstile"
+        data-sitekey={siteKey}
+        data-response-field-name="turnstileToken"
+      />
+
+      <button type="submit" class="contact-submit">送信する</button>
+
+      <p class="contact-note">
+        ※ スパム対策として Cloudflare Turnstile を利用しています。チャレンジが表示された場合はクリアしてから送信してください。
+      </p>
+    </form>
+  )
+}
+
+<script
+  is:inline
+  src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+  async
+  defer
+/>
+
+<style>
+  .contact-form {
+    display: grid;
+    gap: 1.25rem;
+    background: var(--color-surface);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+  }
+  .field {
+    display: grid;
+    gap: 0.35rem;
+  }
+  .field label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--color-primary);
+  }
+  .field input,
+  .field textarea {
+    font: inherit;
+    padding: 0.65rem 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background: var(--color-surface);
+    color: var(--color-text);
+    width: 100%;
+  }
+  .field input:focus,
+  .field textarea:focus {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 1px;
+  }
+  .field textarea {
+    resize: vertical;
+    min-height: 8rem;
+  }
+  .contact-submit {
+    justify-self: start;
+    background: var(--color-accent);
+    color: var(--color-on-accent);
+    border: none;
+    border-radius: 6px;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .contact-submit:hover {
+    background: var(--color-primary-strong);
+  }
+  .contact-note {
+    margin: 0;
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+  }
+  .contact-error {
+    padding: 0.85rem 1rem;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 6px;
+    color: #991b1b;
+  }
+  .contact-success {
+    background: var(--color-surface);
+    padding: 1.5rem;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+  }
+  .contact-success h2 {
+    margin: 0 0 0.5rem;
+  }
+  .contact-success p {
+    margin: 0;
+    color: var(--color-text-muted);
+  }
+</style>

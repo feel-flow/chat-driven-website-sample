@@ -1,0 +1,38 @@
+---
+import Base from '../layouts/Base.astro';
+import ContactForm from '../components/ContactForm.astro';
+import { actions } from 'astro:actions';
+
+export const prerender = false;
+
+const title = 'お問い合わせ — chat-driven-website-sample';
+const description =
+  'chat-driven-website-sample へのお問い合わせフォーム。Astro Form Actions + Resend + Cloudflare Turnstile で構築したサンプル実装です。';
+
+const result = Astro.getActionResult(actions.contact);
+---
+
+<Base title={title} description={description}>
+  <section class="section">
+    <div class="container">
+      <h1 class="page-title">お問い合わせ</h1>
+      <p class="lead">
+        ご質問・ご相談はこちらのフォームよりお送りください。営業日 2 日以内に担当者よりご連絡いたします。
+      </p>
+      <div class="form-wrap">
+        <ContactForm result={result} />
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page-title {
+    font-size: clamp(1.6rem, 3vw, 2.2rem);
+    margin: 0 0 0.75rem;
+  }
+  .form-wrap {
+    max-width: 36rem;
+    margin-inline: auto;
+  }
+</style>
