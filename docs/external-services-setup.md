@@ -34,7 +34,7 @@ Contact フォームは以下 2 つの外部サービスに依存しています
 ### 2-1. アカウント作成
 
 1. [https://resend.com](https://resend.com) にアクセスし、サインアップします（GitHub / Google / メールアドレスで登録可能）。
-2. 無料プランで月 3,000 通 / 日 100 通まで送信できます（本書執筆時点）。
+2. 無料プランで月 3,000 通程度まで送信できます（送信上限・1 日あたりの制約は改訂されることがあるため、最新の枠は [Resend Pricing](https://resend.com/pricing) を確認してください）。
 
 ### 2-2. 送信ドメインの追加と verify
 
@@ -85,10 +85,10 @@ Turnstile は Cloudflare が提供する無料の CAPTCHA 代替サービスで�
 2. **Add site** を選択。
 3. 入力項目：
    - **Site name**: 識別用の名前（例: `chat-driven-website`）
-   - **Domain**: widget を表示するホスト名を **すべて** 追加します。
-     - Vercel Preview の wildcard: `*.vercel.app`
+   - **Domain**: widget を表示するホスト名を **完全一致** で追加します（wildcard 不可、Turnstile UI で実際の表記を必ず確認してください）。
      - 本番ドメイン: `example.com`
      - ローカル開発: `localhost`（必要なら）
+     - **Vercel Preview の扱い**: Vercel Preview の hostname (`<branch>-<hash>.vercel.app`) は PR ごとに変わるため、本番用 Site Key と同じものを使うと Preview で widget が "Error" になります。**Preview 用に別の Turnstile site を作成して別 site key を発行**するか、Production のみ Turnstile 保護する運用を推奨します。
    - **Widget mode**: `Managed`（推奨）。多くのユーザーは challenge なしで通過します。
 4. 作成すると、**Site Key**（`0x4AAAAAAA...`）と **Secret Key**（`0x4AAAAAAA...`）が表示されます。
    - **Site Key** はブラウザに露出して問題ない公開キー
@@ -231,7 +231,13 @@ echo "re_xxxxxxxxxxxxxxxxxxxxxxxx" | vercel env add RESEND_API_KEY production
 
 ログメッセージに従って、欠けている変数や verify 状態を修正してください。「Preview デプロイで動かない」「`.env` の本値を入れたのに動かない」と感じたときは、**まず Vercel Logs を確認する** のが最短経路です。
 
-> **補足**: ローカル開発で `.env` に本値を入れているのに動かない場合は、`vercel env pull` で Vercel 側の値を取り込んだ `.env.local` が `.env` を上書きしていないか確認してください。
+**placeholder のまま登録されている典型パターン**: Vercel Logs に `[contact] resend API error` の行が出ているのに、**Resend ダッシュボードの Logs には該当時刻のリクエストが何も残っていない** 場合、API key 自体が Resend に到達していない可能性が高いです。これは `re_xxxxxxxxxxxxxxxxxxxxxxxx` などの `.env.example` の placeholder 値そのままを Vercel に登録してしまった典型ケースです。本値で上書き登録し直してください。
+
+### 6-4. ローカル開発で `.env` の本値が反映されない
+
+ローカル開発で `.env` に本値を入れているのに動かない場合は、`vercel env pull` で Vercel 側の値を取り込んだ `.env.local` が `.env` を上書きしていないか確認してください。Astro / Vite は `.env.local` を `.env` より優先して読み込むため、`.env.local` に Vercel の placeholder 値が入っているとそちらが採用されます。
+
+`vercel env pull` を実行するときは、本値登録後にもう一度実行して `.env.local` を更新するか、ローカル専用の値を `.env` ではなく `.env.local` に直接書く運用に統一してください。
 
 ---
 
