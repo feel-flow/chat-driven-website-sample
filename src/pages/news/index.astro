@@ -2,9 +2,14 @@
 import { getCollection } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 
-const posts = (await getCollection('news')).sort(
-  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
-);
+const JST_OFFSET_MS = 9 * 60 * 60 * 1000;
+const now = new Date();
+const posts = (
+  await getCollection('news', ({ data }) => {
+    const jstMidnightUtc = new Date(data.publishedAt.getTime() - JST_OFFSET_MS);
+    return jstMidnightUtc <= now;
+  })
+).sort((a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf());
 
 const dateFmt = new Intl.DateTimeFormat('ja-JP', { dateStyle: 'long' });
 ---
