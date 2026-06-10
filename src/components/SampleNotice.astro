@@ -1,0 +1,33 @@
+---
+// 教育用サンプルサイトであることを全ページで告知するバナー。
+// 検索やリンクから直接たどり着いた訪問者に、掲載内容がデモ用であることを伝える。
+// 自社サイトとして使う場合は Base.astro からこのコンポーネントの読み込みを
+// 削除してください（docs/customization.md 参照）。
+const repoUrl = 'https://github.com/feel-flow/chat-driven-website-sample';
+---
+<div class="sample-notice" role="note">
+  <p class="sample-notice-text">
+    このサイトは、書籍『生成AI ホームページ運用』の教育用サンプルサイトです。掲載しているサービス・お知らせはデモ用のコンテンツで、お問い合わせは受け付けていません。仕組みは
+    <a href={repoUrl} rel="noopener noreferrer" target="_blank">GitHub</a>
+    で公開しています。
+  </p>
+</div>
+
+<style>
+  .sample-notice {
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    font-size: 0.8rem;
+    line-height: 1.6;
+  }
+  .sample-notice-text {
+    max-width: var(--container-max);
+    margin: 0 auto;
+    padding: 0.45rem 1rem;
+    text-align: center;
+  }
+  .sample-notice a {
+    color: inherit;
+    text-decoration: underline;
+  }
+</style>
