@@ -164,6 +164,10 @@ rm src/content/services/web-development.md
 
 `src/pages/about.astro` の代表挨拶・会社概要を差し替えます。会社情報（住所・電話・代表者名）は最小限でかまいません。
 
+### サンプルサイト告知バナー
+
+全ページ上部に「教育用サンプルサイトです」というバナー（`src/components/SampleNotice.astro`）が表示されています。自社サイトとして公開する際は、`src/layouts/Base.astro` から `<SampleNotice />` の行と import 行を削除してください（コンポーネントファイル自体も削除してかまいません）。
+
 ---
 
 ## 5. お問い合わせフォームの送信先を変える
@@ -227,6 +231,7 @@ CONTACT_TO_ADDRESS=info@your-company.com
 - [ ] `astro.config.mjs` の `site` が本番ドメイン
 - [ ] ロゴ・ファビコンが自社のもの
 - [ ] サンプルのニュース・サービス記事がすべて削除されたか、自社向けに置き換え済み
+- [ ] サンプルサイト告知バナー（`SampleNotice`）を `Base.astro` から削除済み
 - [ ] トップページ・About ページのコピーが自社向け
 - [ ] `.env` の `RESEND_FROM_ADDRESS` / `CONTACT_TO_ADDRESS` が自社のもの
 - [ ] Resend のドメイン認証完了
