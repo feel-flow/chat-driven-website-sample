@@ -10,7 +10,7 @@
 
 | ツール | バージョン | 用途 |
 |--------|----------|------|
-| Node.js | 22.12.0 以上 | Astro の実行環境 |
+| Node.js | 26.x（26.12.1 以上。feel-flow 共通の基準） | Astro の実行環境 |
 | pnpm | 10.x 推奨 | パッケージマネージャ |
 | Git | 2.40 以上 | バージョン管理 |
 | GitHub アカウント | — | リポジトリホスティング |
@@ -28,18 +28,20 @@
 
 ```bash
 # Homebrew で Node.js を入れる
-brew install node@22
+brew install node@26
 
-# pnpm を有効化（Corepack 経由）
+# pnpm を有効化（Corepack 経由。Node 25 以降は corepack が同梱されないので先に入れる）
+npm install -g corepack
 corepack enable
 corepack prepare pnpm@latest --activate
 ```
 
 ### Windows
 
-[Volta](https://volta.sh/) または [fnm](https://github.com/Schniz/fnm) で Node.js 22 をインストール後、
+[Volta](https://volta.sh/) または [fnm](https://github.com/Schniz/fnm) で Node.js 26 をインストール後、
 
 ```powershell
+npm install -g corepack
 corepack enable
 corepack prepare pnpm@latest --activate
 ```
@@ -47,7 +49,7 @@ corepack prepare pnpm@latest --activate
 ### 確認
 
 ```bash
-node --version   # v22.12.0 以上
+node --version   # v26.12.1 以上
 pnpm --version   # 10.x
 ```
 
